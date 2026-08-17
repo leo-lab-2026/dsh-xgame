@@ -1,0 +1,13 @@
+# dsh-xgame bundle patch:applied when a profile lists `dsh-xgame` among its
+# bundles. Users override this row by `id` in their own profile
+# `cordis.patch.yml` (patch replaces the whole `config`, not merge).
+#
+# storageDir 留空 = 使用 $DSH_HOME/storages/dsh-xgame。
+# 真相数据(海龟汤汤底、侦探案卷)只存于该目录、永不进入模型上下文。
+
+- insert:
+    - id: dsh-xgame
+      name: 'dsh-xgame'
+      config:
+        storageDir: ''
+        language: zh-CN

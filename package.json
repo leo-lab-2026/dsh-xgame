@@ -1,0 +1,64 @@
+{
+  "name": "dsh-xgame",
+  "version": "0.1.0",
+  "description": "DeepSeek Harness 文字冒险/推理游戏插件:海龟汤、侦探推理、密室逃脱、剧本杀、时间循环、王国议会、单人跑团。确定性内核保证公平,LLM 担任主持人(GM)与 NPC;真相封存于引擎,永不进入模型上下文。",
+  "license": "MIT",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "lib/index.d.ts",
+  "files": [
+    "dist",
+    "lib/*.d.ts",
+    "cordis.patch.yml",
+    "README.md"
+  ],
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  },
+  "scripts": {
+    "link-deps": "node scripts/link-deps.mjs",
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "bundle": "node scripts/bundle.mjs",
+    "test": "node scripts/smoke.mjs",
+    "prepublishOnly": "npm run link-deps && npm run build && npm run bundle && npm test"
+  },
+  "keywords": [
+    "deepseek-harness",
+    "dsh",
+    "dsh-plugin",
+    "game",
+    "adventure",
+    "detective",
+    "text-adventure",
+    "lateral-thinking",
+    "murder-mystery",
+    "escape-room",
+    "time-loop",
+    "trpg",
+    "cordis"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/leo-lab-2026/dsh-xgame.git"
+  },
+  "homepage": "https://github.com/leo-lab-2026/dsh-xgame#readme",
+  "bugs": {
+    "url": "https://github.com/leo-lab-2026/dsh-xgame/issues"
+  },
+  "author": "leo-lab-2026",
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org/",
+    "access": "public"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "devDependencies": {
+    "@types/node": "^26.2.0",
+    "esbuild": "^0.28.2",
+    "typescript": "^7.0.2"
+  }
+}
