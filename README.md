@@ -173,7 +173,9 @@ npm stage list               # 查看暂存中的版本
 npm stage approve 0.1.1      # 批准发布(按提示完成 2FA)
 ```
 
-也可以手动触发工作流(GitHub Actions → Publish Package → Run workflow):`stage` = 暂存发布;`publish` = 直接发布;`check` = 仅构建测试不发布。相关文档:[npm Trusted Publishers](https://docs.npmjs.com/trusted-publishers)、[npm staged publishing](https://docs.npmjs.com/cli/v11/commands/npm-stage)。
+也可以手动触发工作流(GitHub Actions → Publish Package → Run workflow):`stage` = 暂存发布;`publish` = 直接发布;`check` = 仅构建测试不发布。
+
+> 完整流程手册(含异常处理与各环节 2FA 要求)见 [docs/10-release-workflow.md](docs/10-release-workflow.md)。相关文档:[npm Trusted Publishers](https://docs.npmjs.com/trusted-publishers)、[npm staged publishing](https://docs.npmjs.com/cli/v11/commands/npm-stage)。
 
 ## 实现说明(与策划文档的取舍)
 

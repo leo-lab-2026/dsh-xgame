@@ -199,4 +199,5 @@ dsh --profile game --port 3180
 - 仓库根 [README.md](../README.md):特性、安装、命令速查、实现说明(与策划文档的取舍)。
 - `docs/README.md`:项目底座(三层架构、反幻觉总原则、组件清单)。
 - `docs/08-comparison-roadmap.md` §0:各阶段完成状态与验证方式。
+- `docs/10-release-workflow.md`:维护者的 GitHub 推送与 npm 发版流程手册。
 - `docs/01`~`07`:七款游戏的完整策划(玩法循环、技术设计、风险对策)。
