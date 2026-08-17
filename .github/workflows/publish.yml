@@ -1,0 +1,74 @@
+name: Publish Package to npmjs
+
+# npmjs 已配置 GitHub Trusted Publisher:
+#   - Organization: leo-lab-2026 / Repository: dsh-xgame
+#   - Workflow filename: publish.yml(本文件)
+#   - Allowed actions: npm publish / npm stage publish
+# 本工作流不携带任何 npm token —— 通过 OIDC(id-token: write)自动认证。
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: '发布方式'
+        type: choice
+        required: true
+        default: 'stage'
+        options:
+          - stage
+          - publish
+          - check
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write # Trusted Publisher OIDC 认证必需
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: 安装依赖
+        run: npm ci
+
+      - name: 编译类型与产物
+        run: npm run build
+
+      - name: 打包自包含发布产物(dist/index.js)
+        run: npm run bundle
+
+      - name: 冒烟测试
+        run: npm test
+
+      - name: 校验标签与版本一致(标签触发时)
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          TAG="${GITHUB_REF_NAME#v}"
+          PKG=$(node -p "require('./package.json').version")
+          if [ "$TAG" != "$PKG" ]; then
+            echo "::error::标签 v${TAG} 与 package.json 版本 ${PKG} 不一致 —— 先 npm version 再打标签"
+            exit 1
+          fi
+
+      - name: 暂存发布(npm stage publish,推荐)
+        if: github.event_name == 'push' || inputs.mode == 'stage'
+        run: npm stage publish --provenance --access public
+
+      - name: 直接发布(npm publish)
+        if: inputs.mode == 'publish'
+        run: npm publish --provenance --access public
+
+      - name: 仅检查模式说明
+        if: inputs.mode == 'check'
+        run: echo "check 模式:构建与测试通过,未执行发布。"
