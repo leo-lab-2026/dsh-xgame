@@ -1,6 +1,6 @@
 {
   "name": "dsh-xgame",
-  "version": "0.1.2",
+  "version": "0.1.3-beta.0",
   "description": "DeepSeek Harness 文字冒险/推理游戏插件:海龟汤、侦探推理、密室逃脱、剧本杀、时间循环、王国议会、单人跑团。确定性内核保证公平,LLM 担任主持人(GM)与 NPC;真相封存于引擎,永不进入模型上下文。",
   "license": "MIT",
   "type": "module",
