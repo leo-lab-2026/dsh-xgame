@@ -183,7 +183,7 @@ const VERDICT_LABEL: Record<string, string> = { yes: '是', no: '否', irrelevan
 const VERDICT_INSTRUCTION: Record<string, string> = {
   yes: '用自然语言确认玩家问到的这一点(可以用自己的话轻微展开,但仅限于裁决为"是"的范围)',
   no: '礼貌否定玩家的猜测,可以纠正方向,但不要说出任何汤底细节',
-  irrelevant: '告诉玩家这个问题与汤底无关(或你无法据此判断),引导他换个角度',
+  irrelevant: '告诉玩家这个问题与汤底无关(或你无法据此判断),引导他换个角度;禁止编造任何汤面之外的场景/人物/事件来圆场',
 }
 
 export function registerTools(ctx: Context, manager: GameManager): void {
