@@ -155,27 +155,21 @@ npm test            # 冒烟测试(装配 + 引擎 + 生成器/求解器 + 存�
 - 发布/安装产物是 `dist/index.js`(package.json 的 `main` 指向它):运行时依赖已全部打包进产物,**不会向 profile 的 node_modules 引入任何 `@deepseek-ai` 包**——否则会遮蔽 harness 自身的同名模块解析(双实例导致工具调用崩溃,已实测复现),这是必须打包的原因。
 - 以 `link:` 安装进 profile 后,重新 `npm run build && npm run bundle` 并重启 `dsh` 进程即生效。
 
-## 发布(Trusted Publisher + 暂存发布)
+## 发布(Trusted Publisher + 全自动)
 
-npmjs 已为 `dsh-xgame` 配置 **GitHub Trusted Publisher**(仓库 `leo-lab-2026/dsh-xgame`,workflow 文件 `publish.yml`,允许 `npm publish` 与 `npm stage publish`)。发布**不需要任何 npm token**:工作流通过 OIDC(`id-token: write`)自动认证。
+npmjs 已为 `dsh-xgame` 配置 **GitHub Trusted Publisher**(仓库 `leo-lab-2026/dsh-xgame`,workflow 文件 `publish.yml`,允许 `npm publish`)。发布**全自动、不需要任何 npm token、无需人工环节**:工作流通过 OIDC(`id-token: write`)自动认证后,直接 `npm publish --provenance --access public` 上线。
 
 ```sh
-# 1. 提升版本并打标签(版本必须与标签一致,工作流会校验)
+# 提升版本并打标签(版本必须与标签一致,工作流会校验)
 npm version patch            # 0.1.0 → 0.1.1,自动 commit + tag v0.1.1
 git push && git push --tags
 ```
 
-推送 `v*` 标签后,`.github/workflows/publish.yml` 自动:构建 → 打包 → 冒烟测试 → **`npm stage publish --provenance`**(暂存,不对外可见)。
+推送 `v*` 标签即触发发布:`.github/workflows/publish.yml` 构建 → 打包 → 冒烟测试 → **`npm publish --provenance --access public`**(OIDC 自动认证,直接对公众可见),全程无人值守。
 
-```sh
-# 2. 批准暂存版本(需要 2FA,是唯一的"人在场"环节)
-npm stage list               # 查看暂存中的版本
-npm stage approve 0.1.1      # 批准发布(按提示完成 2FA)
-```
+也可以手动触发工作流(GitHub Actions → Publish Package → Run workflow):`publish` = 直接发布(需确认 tag 与版本一致);`check` = 仅构建测试不发布。
 
-也可以手动触发工作流(GitHub Actions → Publish Package → Run workflow):`stage` = 暂存发布;`publish` = 直接发布;`check` = 仅构建测试不发布。
-
-> 完整流程手册(含异常处理与各环节 2FA 要求)见 [docs/10-release-workflow.md](docs/10-release-workflow.md)。相关文档:[npm Trusted Publishers](https://docs.npmjs.com/trusted-publishers)、[npm staged publishing](https://docs.npmjs.com/cli/v11/commands/npm-stage)。
+> 完整流程手册(含异常处理与 OIDC 注意事项)见 [docs/10-release-workflow.md](docs/10-release-workflow.md)。相关文档:[npm Trusted Publishers](https://docs.npmjs.com/trusted-publishers)。
 
 ## 实现说明(与策划文档的取舍)
 

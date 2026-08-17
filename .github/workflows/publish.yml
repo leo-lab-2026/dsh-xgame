@@ -5,6 +5,12 @@ name: Publish Package to npmjs
 #   - Workflow filename: publish.yml(本文件)
 #   - Allowed actions: npm publish / npm stage publish
 # 本工作流不携带任何 npm token —— 通过 OIDC(id-token: write)自动认证。
+#
+# OIDC 直接发布的三条硬性要求(踩过的坑,见 dsh-lark-bridge 发布手册):
+#   1. 必须跑 Node 24(自带 npm ≥ 11.5.1,OIDC 才生效;Node 22 自带 npm 10 会退回 token 认证并 404)。
+#   2. actions/setup-node 不要配置 registry-url —— 无真实 NODE_AUTH_TOKEN 时 setup-node 会
+#      写入占位 token,令 OIDC 失效、发布直接 404。
+#   3. Trusted Publisher 信任关系需允许 publish 动作(当前已允许 npm publish)。
 
 on:
   push:
@@ -16,9 +22,8 @@ on:
         description: '发布方式'
         type: choice
         required: true
-        default: 'stage'
+        default: 'publish'
         options:
-          - stage
           - publish
           - check
 
@@ -34,10 +39,11 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
+      # 注意:这里刻意不写 registry-url。一旦写了,setup-node 会写入一个占位 _authToken,
+      # npm 便会走 token 认证(而非 OIDC),发布会因凭据错误而 404。
       - uses: actions/setup-node@v6
         with:
           node-version: '24'
-          registry-url: 'https://registry.npmjs.org'
 
       - name: 安装依赖
         run: npm ci
@@ -61,14 +67,16 @@ jobs:
             exit 1
           fi
 
-      - name: 暂存发布(npm stage publish,推荐)
-        if: github.event_name == 'push' || inputs.mode == 'stage'
-        run: npm stage publish --provenance --access public
-
-      - name: 直接发布(npm publish)
-        if: inputs.mode == 'publish'
-        run: npm publish --provenance --access public
+      - name: 直接发布(npm publish,OIDC 全自动,无人工环节)
+        if: github.event_name == 'push' || inputs.mode == 'publish'
+        run: |
+          # dist-tag 策略:预发布(beta/rc/pre/dev)进 `next`;`latest` 只收稳定版。
+          case "$GITHUB_REF_NAME" in
+            *-beta.*|*-rc.*|*-pre.*|*-dev.*) tag="--tag next" ;;
+            *) tag="" ;;
+          esac
+          npm publish --provenance --access public $tag
 
       - name: 仅检查模式说明
-        if: inputs.mode == 'check'
+        if: github.event_name == 'workflow_dispatch' && inputs.mode == 'check'
         run: echo "check 模式:构建与测试通过,未执行发布。"
